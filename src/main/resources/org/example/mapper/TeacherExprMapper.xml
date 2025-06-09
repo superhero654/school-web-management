@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.TeacherExprMapper">
+
+    <!--批量保存教师经历信息-->
+    <insert id="insertBatch">
+        insert into teacher_expr(teacher_id,begin,end,site,job) values
+        <foreach collection="exprList" item="expr" separator=",">
+            (#{expr.teacherId},#{expr.begin},#{expr.end},#{expr.site},#{expr.job})
+        </foreach>
+    </insert>
+
+    <!--    根据id批量删除教师工作经历信息-->
+    <delete id="deleteByTeacherIds">
+        delete from teacher_expr where teacher_id in
+        <foreach collection="teacherIds" item="teacherId" separator="," open="(" close=")">
+            #{teacherId}
+        </foreach>
+    </delete>
+</mapper>

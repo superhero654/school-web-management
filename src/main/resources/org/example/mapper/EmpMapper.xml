@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.EmpMapper">
+<!--    根据id更新职工信息-->
+<!--    set标签：自动生成set关键字，会自动更新字段后多余的，-->
+    <update id="updateById">
+        update emp
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="salary != null">salary = #{salary},</if>
+            <if test="entryDate != null">entry_date = #{entryDate},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--    批量删除职工的基本信息-->
+    <delete id="deleteByIds">
+        delete from emp where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="page" resultType="org.example.pojo.Emp">
+        select emp.*,dept.name deptName from emp left join dept on emp.dept_id = dept.id
+        <where>
+            <if test="name != null and name !=''">
+                emp.name like concat('%',#{name},'%')
+            </if>
+            <if test="gender != null">
+                and emp.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and emp.entry_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by emp.update_time desc
+    </select>
+
+
+<!--    定义ResultMap-->
+    <resultMap id="empResultMap" type="org.example.pojo.Emp">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="phone" column="phone"/>
+        <result property="salary" column="salary"/>
+        <result property="entryDate" column="entry_date"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="exprList" ofType="org.example.pojo.EmpExpr">
+            <id property="id" column="emp_expr_id"/>
+            <result property="empId" column="emp_expr_id"/>
+            <result property="begin" column="emp_expr_begin"/>
+            <result property="end" column="emp_expr_end"/>
+            <result property="site" column="emp_expr_site"/>
+            <result property="job" column="emp_expr_job"/>
+</collection>
+    </resultMap>
+<!--    根据id查询职工信息和工作经历-->
+    <select id="getById" resultMap="empResultMap">
+        select
+            emp.*,
+            emp_expr.id emp_expr_id,
+            emp_expr.begin emp_expr_begin,
+            emp_expr.end emp_expr_end,
+            emp_expr.site emp_expr_site,
+            emp_expr.job emp_expr_job
+        from emp left join emp_expr on emp.id = emp_expr.emp_id
+        where emp.id = #{id}
+    </select>
+<!--    统计职工职位人数-->
+    <select id="countEmpJobData" resultType="java.util.Map">
+        select
+            (case when dept_id=1 then '学工部'
+                  when dept_id=2 then '教研部'
+                  when dept_id=3 then '咨询部'
+                  when dept_id=4 then '就业部'
+                  when dept_id=5 then '后勤部'
+                  when dept_id=6 then '行政部'
+                  else '其他' end) pos,
+            count(*) num
+        from emp group by dept_id order by num
+    </select>
+<!--    统计职工性别人数-->
+    <select id="countEmpGenderData" resultType="java.util.Map">
+        select if(gender = 1, '男', '女') name,
+               count(*) value
+        from emp group by gender
+    </select>
+
+</mapper>

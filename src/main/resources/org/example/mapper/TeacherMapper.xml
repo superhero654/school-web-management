@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.TeacherMapper">
+    <!--    根据id更新教师信息-->
+    <update id="updateById">
+        update teacher
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="hireDate != null">hire_date = #{hireDate},</if>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--    批量删除教师的基本信息-->
+    <delete id="deleteByIds">
+        delete from teacher where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="page" resultType="org.example.pojo.Teacher">
+        select teacher.*,course.name courseName from teacher left join course on teacher.course_id = course.id
+        <where>
+            <if test="name != null and name !=''">
+                teacher.name like concat('%',#{name},'%')
+            </if>
+            <if test="gender != null">
+                and teacher.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and teacher.hire_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by teacher.update_time desc
+    </select>
+
+
+    <!--    定义ResultMap-->
+    <resultMap id="teacherResultMap" type="org.example.pojo.Teacher">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="phone" column="phone"/>
+        <result property="title" column="title"/>
+        <result property="hireDate" column="hire_date"/>
+        <result property="courseId" column="course_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="exprList" ofType="org.example.pojo.TeacherExpr">
+            <id property="id" column="teacher_expr_id"/>
+            <result property="teacherId" column="teacher_expr_id"/>
+            <result property="begin" column="teacher_expr_begin"/>
+            <result property="end" column="teacher_expr_end"/>
+            <result property="site" column="teacher_expr_site"/>
+            <result property="job" column="teacher_expr_job"/>
+        </collection>
+    </resultMap>
+    <!--    根据id查询教师信息和工作经历-->
+    <select id="getById" resultMap="teacherResultMap">
+        select
+            teacher.*,
+            teacher_expr.id teacher_expr_id,
+            teacher_expr.begin teacher_expr_begin,
+            teacher_expr.end teacher_expr_end,
+            teacher_expr.site teacher_expr_site,
+            teacher_expr.job teacher_expr_job
+        from teacher left join teacher_expr on teacher.id = teacher_expr.teacher_id
+        where teacher.id = #{id}
+    </select>
+    <!--    统计教师职位人数-->
+    <select id="countTeacherTitleData" resultType="java.util.Map">
+        select
+            (case when title=1 then '教授'
+                  when title=2 then '副教授'
+                  when title=3 then '讲师'
+                  when title=4 then '企业教师'
+                  else '其他' end) pos,
+            count(*) num
+        from teacher group by title order by num
+    </select>
+    <!--    统计教师性别人数-->
+    <select id="countTeacherGenderData" resultType="java.util.Map">
+        select if(gender = 1, '男教师', '女教师') name,
+               count(*) value
+        from teacher group by gender
+    </select>
+
+<!--      根据名称查询教师信息-->
+    <select id="getInfoName" resultType="org.example.pojo.Teacher">
+        select * from teacher where name = #{name}
+        LIMIT 1
+    </select>
+
+</mapper>

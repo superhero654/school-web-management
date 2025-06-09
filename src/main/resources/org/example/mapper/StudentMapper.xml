@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.StudentMapper">
+<!--    根据id更新学生信息-->
+    <update id="updateById">
+        update student
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="admissionDate != null">admission_date = #{admissionDate},</if>
+            <if test="clazzId != null">clazz_id = #{clazzId},</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--    根据id批量删除学生-->
+    <delete id="deleteByIds">
+        delete from student where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+<!--    条件查询学生信息-->
+    <select id="page" resultType="org.example.pojo.Student">
+        select student.*,clazz.name clazzName from student left join clazz on student.clazz_id = clazz.id
+        <where>
+            <if test="name != null and name !=''">
+                student.name like concat('%',#{name},'%')
+            </if>
+            <if test="gender != null">
+                and student.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and student.admission_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by student.update_time desc
+    </select>
+
+<!--    根据id查询学生信息-->
+    <select id="getById" resultType="org.example.pojo.Student">
+        select student.*,clazz.name clazzName
+        from student left join clazz on student.clazz_id = clazz.id
+        where
+            student.id = #{id}
+    </select>
+
+<!--    统计学生班级人数-->
+    <select id="countStudentClazzData" resultType="java.util.Map">
+        select clazz.name name,
+               count(*) value
+        from student left join clazz on student.clazz_id = clazz.id
+        group by clazz.name
+    </select>
+
+<!--    统计学生性别人数-->
+    <select id="countStudentGenderData" resultType="java.util.Map">
+        select if(gender = 1, '男学生', '女学生') name,
+               count(*) value
+        from student group by gender
+    </select>
+
+<!--    根据姓名获取学生信息-->
+    <select id="getInfoName" resultType="org.example.pojo.Student">
+        select * from student where name = #{name}
+        limit 1
+    </select>
+
+</mapper>

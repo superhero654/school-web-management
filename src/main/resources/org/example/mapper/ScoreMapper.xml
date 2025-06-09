@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.ScoreMapper">
+    <insert id="insert">
+        INSERT INTO score(student_id, course_id, teacher_id, regular_score, exam_score, final_score, create_time)
+        SELECT
+        stu.id,
+        c.id,
+        t.id,
+        #{regularScore},
+        #{examScore},
+        #{regularScore} * 0.3 + #{examScore} * 0.7,
+        #{createTime}
+        FROM
+        student stu,
+        course c,
+        teacher t
+        WHERE
+        stu.name = #{studentName}
+        AND c.name = #{courseName}
+        AND t.name = #{teacherName}
+        AND t.course_id = c.id
+    </insert>
+
+    <update id="updateById">
+        update score
+        <set>
+            <if test="studentId != null">student_id = #{studentId},</if>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="teacherId != null">teacher_id = #{teacherId},</if>
+            <if test="regularScore != null">regular_score = #{regularScore},</if>
+            <if test="examScore != null">exam_score = #{examScore}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
+        delete from score where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="page" resultType="org.example.pojo.Score">
+        select score.*,student.name studentName,course.name courseName,teacher.name teacherName from score
+        left join student on score.student_id = student.id
+        left join course on score.course_id = course.id
+        left join teacher on score.teacher_id = teacher.id
+        <where>
+            <if test="studentName != null and studentName !=''">
+                student.name like concat('%',#{studentName},'%')
+            </if>
+            <if test="courseName != null and courseName !=''">
+                and course.name like concat('%',#{courseName},'%')
+            </if>
+            <if test="teacherName != null and teacherName !=''">
+                and teacher.name like concat('%',#{teacherName},'%')
+            </if>
+            <if test="min != null and max != null">
+                and score.final_score between #{min} and #{max}
+            </if>
+        </where>
+        order by score.create_time desc
+    </select>
+
+    <select id="getById" resultType="org.example.pojo.Score">
+        select score.*,student.name studentName,course.name courseName,teacher.name teacherName
+        from score
+        left join student on score.student_id = student.id
+        left join course on score.course_id = course.id
+        left join teacher on score.teacher_id = teacher.id
+        where
+            score.student_id = #{id}
+    </select>
+
+    <select id="countStudentRankData" resultType="java.util.Map">
+        SELECT
+            (CASE WHEN final_score BETWEEN 90 AND 100 THEN '优秀'
+                  WHEN final_score BETWEEN 80 AND 89 THEN '良好'
+                  WHEN final_score BETWEEN 70 AND 79 THEN '中等'
+                  WHEN final_score BETWEEN 60 AND 69 THEN '及格'
+                  ELSE '不及格' END) AS pos,
+            COUNT(*) AS num
+        FROM score
+        GROUP BY pos
+        ORDER BY num DESC
+    </select>
+
+    <select id="countStudentAverageData" resultType="java.util.Map">
+        SELECT
+            c.name AS courseName,
+            AVG(s.final_score) AS averageScore,
+            COUNT(s.id) AS totalStudents,
+            SUM(CASE WHEN s.final_score > avg_scores.avg_score THEN 1 ELSE 0 END) AS aboveAverageCount,
+            ROUND(SUM(CASE WHEN s.final_score > avg_scores.avg_score THEN 1 ELSE 0 END) * 100.0 / COUNT(s.id), 2) AS aboveAveragePercentage
+        FROM score s
+                 JOIN course c ON s.course_id = c.id
+                 JOIN (
+            SELECT course_id, AVG(final_score) AS avg_score
+            FROM score
+            GROUP BY course_id
+        ) avg_scores ON s.course_id = avg_scores.course_id
+        GROUP BY c.name, avg_scores.avg_score
+        ORDER BY aboveAveragePercentage DESC
+    </select>
+    <select id="stuPage" resultType="org.example.pojo.Score">
+        select score.*,student.name studentName,course.name courseName,teacher.name teacherName from score
+        left join student on score.student_id = student.id
+        left join course on score.course_id = course.id
+        left join teacher on score.teacher_id = teacher.id
+        where
+            score.student_id = #{id}
+    </select>
+</mapper>

@@ -13,6 +13,7 @@ public class Course {
     private Integer id;
     private String name;
     private Integer credit;
+    private String courseIntroduction;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

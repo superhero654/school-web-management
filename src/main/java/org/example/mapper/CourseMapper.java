@@ -7,7 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface CourseMapper {
-    @Select("select id,name,credit,create_time,update_time from course order by update_time DESC")
+    @Select("select id,name,credit,course_introduction,create_time,update_time from course order by update_time DESC")
     List<Course> findAll();
 
     //根据id删除课程
@@ -15,14 +15,14 @@ public interface CourseMapper {
     void deleteById(Integer id);
 
     //添加课程
-    @Insert("insert into course(name,credit,create_time,update_time) values(#{name},#{credit},#{createTime},#{updateTime})")
+    @Insert("insert into course(name,credit,create_time,course_introduction,update_time) values(#{name},#{credit},#{courseIntroduction},#{createTime},#{updateTime})")
     void add(Course course);
 
     //根据id查询课程
-    @Select("select id,name,credit,create_time,update_time from course where id=#{id}")
+    @Select("select id,name,credit,create_time,course_introduction,update_time from course where id=#{id}")
     Course getById(Integer id);
 
     //更新课程
-    @Update("update course set name=#{name},credit=#{credit},update_time=#{updateTime} where id=#{id}")
+    @Update("update course set name=#{name},credit=#{credit},course_introduction=#{courseIntroduction},update_time=#{updateTime} where id=#{id}")
     void update(Course course);
 }

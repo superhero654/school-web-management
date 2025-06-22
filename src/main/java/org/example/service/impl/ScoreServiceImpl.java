@@ -54,4 +54,9 @@ public class ScoreServiceImpl implements ScoreService {
     public List<Score> stuPage(Integer id) {
         return scoreMapper.stuPage(id);
     }
+
+    @Override
+    public Score getAdminInfo(Integer id) {
+        return scoreMapper.getAdminById(id);
+    }
 }

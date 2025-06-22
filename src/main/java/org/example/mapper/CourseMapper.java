@@ -15,7 +15,7 @@ public interface CourseMapper {
     void deleteById(Integer id);
 
     //添加课程
-    @Insert("insert into course(name,credit,create_time,course_introduction,update_time) values(#{name},#{credit},#{courseIntroduction},#{createTime},#{updateTime})")
+    @Insert("insert into course(name,credit,course_introduction,create_time,update_time) values(#{name},#{credit},#{courseIntroduction},#{createTime},#{updateTime})")
     void add(Course course);
 
     //根据id查询课程

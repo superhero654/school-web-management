@@ -2,6 +2,7 @@ package org.example.service.impl;
 
 import org.example.mapper.DeptMapper;
 import org.example.pojo.Dept;
+import org.example.pojo.Feedback;
 import org.example.service.DeptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,22 @@ public class DeptServiceImpl implements DeptService {
         dept.setUpdateTime(LocalDateTime.now());
         //2.调用Mapper接口方法更新数据
         deptMapper.update(dept);
+    }
+
+    @Override
+    public void addAdvice(Feedback feedback) {
+        feedback.setSubmitTime(LocalDateTime.now());
+
+        deptMapper.addAdvice(feedback);
+    }
+
+    @Override
+    public List<Feedback> findAllAdvice() {
+        return deptMapper.findAllAdvice();
+    }
+
+    @Override
+    public Feedback getAdviceById(Integer id) {
+        return deptMapper.getAdviceById(id);
     }
 }

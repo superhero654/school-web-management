@@ -49,6 +49,13 @@ public class ScoreController {
         return Result.success(score);
     }
 
+    @GetMapping("/admin/{id}")
+    public Result getAdmin(@PathVariable Integer id){
+        log.info("查询单个成绩：{}",id);
+        Score score = scoreService.getAdminInfo(id);
+        return Result.success(score);
+    }
+
     //修改成绩
     @PutMapping
     public Result update(@RequestBody Score score){

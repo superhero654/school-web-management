@@ -29,4 +29,6 @@ public interface ScoreMapper {
     List<Map<String, Object>> countStudentAverageData();
 
     List<Score> stuPage(Integer id);
+
+    Score getAdminById(Integer id);
 }

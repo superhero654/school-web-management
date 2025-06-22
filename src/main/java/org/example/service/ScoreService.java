@@ -18,4 +18,6 @@ public interface ScoreService {
     PageResult<Score> page(ScoreQueryParam scoreQueryParam);
 
     List<Score> stuPage(Integer id);
+
+    Score getAdminInfo(Integer id);
 }

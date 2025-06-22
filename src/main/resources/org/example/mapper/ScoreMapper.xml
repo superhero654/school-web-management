@@ -113,4 +113,13 @@
         where
             score.student_id = #{id}
     </select>
+    <select id="getAdminById" resultType="org.example.pojo.Score">
+        select score.*,student.name studentName,course.name courseName,teacher.name teacherName
+        from score
+                 left join student on score.student_id = student.id
+                 left join course on score.course_id = course.id
+                 left join teacher on score.teacher_id = teacher.id
+        where
+            score.id = #{id}
+    </select>
 </mapper>

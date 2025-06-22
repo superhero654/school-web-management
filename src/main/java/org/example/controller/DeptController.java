@@ -2,6 +2,7 @@ package org.example.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.pojo.Dept;
+import org.example.pojo.Feedback;
 import org.example.pojo.Result;
 import org.example.service.DeptService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +55,29 @@ public class DeptController {
         log.info("修改部门数据: {}",dept);
         deptService.update(dept);
         return Result.success();
+    }
+
+    //意见反馈
+    @PostMapping("/addAdvice")
+    public Result addAdvice(@RequestBody Feedback feedback){
+        log.info("添加部门意见反馈数据: {}",feedback);
+        deptService.addAdvice(feedback);
+        return Result.success();
+    }
+
+    //意见反馈查询
+    @GetMapping("/showAdvice")
+    public Result showAdvice() {
+        log.info("查询全部的部门意见数据");
+        List<Feedback> feedbackList = deptService.findAllAdvice();
+        return Result.success(feedbackList);
+    }
+
+
+    @GetMapping("/advice/{id}")
+    public Result getAdviceInfo(@PathVariable Integer id){
+        log.info("查询部门意见数据: {}",id);
+        Feedback feedback = deptService.getAdviceById(id);
+        return Result.success(feedback);
     }
 }
